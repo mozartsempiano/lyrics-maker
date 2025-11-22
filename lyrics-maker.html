@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content="Create Spotify-style lyric cards" />
+		<meta name="keywords" content="lyrics, spotify, card, generator" />
+		<title>Lyric Card Maker</title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+		<style>
+			@font-face {
+				font-family: "Circular";
+				src: url("https://encore.scdn.co/fonts/SpotifyMixUI-Regular-cc3b1de388efa4cbca6c75cebc24585e.woff2") format("woff2");
+				font-weight: 400;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Circular";
+				src: url("https://encore.scdn.co/fonts/SpotifyMixUI-Bold-4264b799009b1db5c491778b1bc8e5b7.woff2") format("woff2");
+				font-weight: 700;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			@font-face {
+				font-family: "Circular";
+				src: url("https://encore.scdn.co/fonts/SpotifyMixUITitleVariable-8769ccfde3379b7ebcadd9529b49d0cc.woff2") format("woff2");
+				font-weight: 100 900;
+				font-style: normal;
+				font-display: swap;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+			}
+
+			body {
+				font-family: "Circular", "Helvetica Neue", Arial, sans-serif;
+				background: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+				min-height: 100vh;
+				color: #fff;
+				overflow-x: hidden;
+			}
+
+			.container {
+				display: flex;
+				min-height: 100vh;
+				gap: 40px;
+				padding: 40px;
+				max-width: 1400px;
+				margin: 0 auto;
+			}
+
+			.sidebar {
+				flex: 1;
+				max-width: 400px;
+				background: rgba(0, 0, 0, 0.7);
+				border-radius: 12px;
+				padding: 32px;
+				backdrop-filter: blur(10px);
+				border: 1px solid rgba(255, 255, 255, 0.1);
+				height: fit-content;
+			}
+
+			.main-content {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				min-height: calc(100vh - 80px);
+			}
+
+			.header-title {
+				font-size: 2.5rem;
+				font-weight: 900;
+				margin-bottom: 8px;
+				background: linear-gradient(45deg, #1ed760, #ffffff);
+				-webkit-background-clip: text;
+				-webkit-text-fill-color: transparent;
+				background-clip: text;
+			}
+
+			.header-subtitle {
+				font-size: 1rem;
+				color: rgba(255, 255, 255, 0.7);
+				margin-bottom: 32px;
+			}
+
+			.form-group {
+				margin-bottom: 24px;
+			}
+
+			.form-label {
+				display: block;
+				font-size: 0.9rem;
+				font-weight: 600;
+				color: rgba(255, 255, 255, 0.9);
+				margin-bottom: 8px;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+			}
+
+			.form-input {
+				width: 100%;
+				padding: 16px;
+				border: 2px solid rgba(255, 255, 255, 0.1);
+				border-radius: 8px;
+				background: rgba(255, 255, 255, 0.05);
+				color: #fff;
+				font-size: 1rem;
+				transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+				font-family: inherit;
+			}
+
+			.form-input:focus {
+				outline: none;
+				border-color: #1ed760;
+				background: rgba(255, 255, 255, 0.1);
+				box-shadow: 0 0 0 3px rgba(30, 215, 96, 0.2);
+			}
+
+			.form-input::placeholder {
+				color: rgba(255, 255, 255, 0.5);
+			}
+
+			/* Restrict textarea resize to vertical only */
+			textarea.form-input {
+				resize: vertical;
+				min-height: 100px;
+			}
+
+			.file-input-wrapper {
+				position: relative;
+				display: inline-block;
+				width: 100%;
+			}
+
+			.file-input {
+				position: absolute;
+				opacity: 0;
+				width: 100%;
+				height: 100%;
+				cursor: pointer;
+			}
+
+			.file-input-label {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 12px;
+				padding: 16px;
+				border: 2px dashed rgba(255, 255, 255, 0.3);
+				border-radius: 8px;
+				background: rgba(255, 255, 255, 0.05);
+				color: rgba(255, 255, 255, 0.7);
+				cursor: pointer;
+				transition: all 0.3s ease;
+				font-weight: 500;
+			}
+
+			.file-input-label:hover {
+				border-color: #1ed760;
+				background: rgba(30, 215, 96, 0.1);
+				color: #1ed760;
+			}
+
+			.checkbox-group {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				margin-bottom: 16px;
+			}
+
+			.checkbox {
+				width: 20px;
+				height: 20px;
+				accent-color: #1ed760;
+				margin: 0;
+			}
+
+			input[type="checkbox"].checkbox {
+				cursor: pointer;
+			}
+
+			.checkbox-label {
+				font-size: 0.95rem;
+				color: rgba(255, 255, 255, 0.9);
+				cursor: pointer;
+				user-select: none;
+				margin: 0;
+			}
+
+			.color-input {
+				width: 100%;
+				height: 60px;
+				border: 2px solid rgba(255, 255, 255, 0.1);
+				border-radius: 8px;
+				background: none;
+				cursor: pointer;
+				transition: all 0.3s ease;
+			}
+
+			.color-input:hover {
+				border-color: #1ed760;
+				box-shadow: 0 0 0 3px rgba(30, 215, 96, 0.2);
+			}
+
+			.buttons-container {
+				display: flex;
+				gap: 12px;
+				margin-top: 32px;
+			}
+
+			.btn {
+				flex: 1;
+				padding: 16px 24px;
+				border: none;
+				border-radius: 50px;
+				font-weight: 700;
+				font-size: 0.95rem;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+				font-family: inherit;
+			}
+
+			.btn-primary {
+				background: linear-gradient(45deg, #1ed760, #1db954);
+				color: #000;
+			}
+
+			.btn-primary:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 8px 25px rgba(30, 215, 96, 0.4);
+			}
+
+			.btn-secondary {
+				background: rgba(255, 255, 255, 0.1);
+				color: #fff;
+				border: 2px solid rgba(255, 255, 255, 0.2);
+			}
+
+			.btn-secondary:hover {
+				background: rgba(255, 255, 255, 0.2);
+				transform: translateY(-2px);
+			}
+
+			:root {
+				--card-radius: 20px;
+			}
+
+			.card {
+				width: 532px;
+				height: 532px;
+				background-color: #d84c3d;
+				border-radius: var(--card-radius);
+				padding: 24px;
+				color: #000;
+				display: flex;
+				flex-direction: column;
+				justify-content: flex-start;
+				gap: 26px;
+				box-sizing: border-box;
+				position: relative;
+				user-select: none;
+				box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+				transition: transform 0.3s ease;
+				font-size: 1rem;
+				overflow: hidden;
+			}
+
+			.card:hover {
+				transform: translateY(-5px);
+			}
+
+			.card img {
+				width: 50px;
+				height: 50px;
+				object-fit: cover;
+				border-radius: 7px;
+				image-rendering: auto;
+			}
+
+			/* Default cover placeholder */
+			.card img:not([src]),
+			.card img[src=""] {
+				background-color: #333;
+				background-image: linear-gradient(45deg, #444 25%, transparent 25%), linear-gradient(-45deg, #444 25%, transparent 25%),
+					linear-gradient(45deg, transparent 75%, #444 75%), linear-gradient(-45deg, transparent 75%, #444 75%);
+				background-size: 8px 8px;
+				background-position: 0 0, 0 4px, 4px -4px, -4px 0px;
+			}
+
+			.header {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+			}
+
+			.header div {
+				display: flex;
+				flex-direction: column;
+				gap: 2px;
+			}
+
+			.title {
+				font-weight: bold;
+			}
+
+			.title,
+			.artist {
+				font-size: 1.1em;
+			}
+
+			:root {
+				--lyrics-max-height: 342px;
+			}
+
+			.lyrics {
+				font-size: 3.2em;
+				white-space: pre-wrap;
+				font-weight: bold;
+				letter-spacing: 0em;
+				margin-bottom: 2.5rem;
+				line-height: 1.1;
+				flex-grow: 1;
+				display: flex;
+				align-items: flex-start;
+				max-height: var(--lyrics-max-height);
+				overflow: hidden;
+			}
+
+			.spotify-logo {
+				position: absolute;
+				bottom: 24px;
+				left: 24px;
+				width: auto;
+				height: 26px;
+				opacity: 0.8;
+			}
+
+			footer {
+				text-align: center;
+				padding: 18px 0;
+				color: black;
+				font-size: 0.95rem;
+			}
+
+			footer a {
+				color: inherit;
+				text-decoration: underline dotted;
+				transition: filter 0.2s ease;
+			}
+
+			footer a:hover {
+				text-decoration: underline solid;
+			}
+
+			@media (max-width: 1024px) {
+				.container {
+					flex-direction: column;
+					gap: 32px;
+					padding: 24px;
+				}
+
+				.sidebar {
+					max-width: none;
+					order: 1;
+				}
+
+				.main-content {
+					order: 2;
+					min-height: auto;
+				}
+
+				.card {
+					width: 100%;
+					max-width: 532px;
+				}
+			}
+
+			@media (max-width: 768px) {
+				.container {
+					padding: 16px;
+					gap: 24px;
+				}
+
+				.sidebar {
+					padding: 24px;
+				}
+
+				.header-title {
+					font-size: 2rem;
+				}
+
+				.card {
+					width: 100%;
+					height: auto;
+					aspect-ratio: 1 / 1;
+				}
+
+				.buttons-container {
+					flex-direction: column;
+				}
+
+				.btn {
+					flex: none;
+				}
+			}
+
+			@media (max-width: 480px) {
+				.container {
+					padding: 12px;
+				}
+
+				.sidebar {
+					padding: 20px;
+				}
+
+				.header-title {
+					font-size: 1.75rem;
+				}
+
+				.form-input {
+					padding: 14px;
+				}
+
+				.btn {
+					padding: 14px 20px;
+				}
+			}
+
+			/* Dark scrollbar */
+			::-webkit-scrollbar {
+				width: 8px;
+			}
+
+			::-webkit-scrollbar-track {
+				background: rgba(255, 255, 255, 0.1);
+			}
+
+			::-webkit-scrollbar-thumb {
+				background: rgba(255, 255, 255, 0.3);
+				border-radius: 4px;
+			}
+
+			::-webkit-scrollbar-thumb:hover {
+				background: rgba(255, 255, 255, 0.5);
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="sidebar">
+				<h1 class="header-title">Lyrics Card Maker</h1>
+				<p class="header-subtitle">Create Spotify-style lyric cards</p>
+
+				<div class="form-group">
+					<label class="form-label">Album Cover</label>
+					<div class="file-input-wrapper">
+						<input type="file" id="coverUpload" accept="image/*" class="file-input" />
+						<div class="file-input-label">
+							<span>Choose image</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Title</label>
+					<input type="text" id="titleInput" placeholder="Song title" class="form-input" />
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Artist</label>
+					<input type="text" id="artistInput" placeholder="Artist name" class="form-input" />
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Lyrics</label>
+					<textarea id="lyricsInput" placeholder="Enter song lyrics..." rows="4" class="form-input"></textarea>
+				</div>
+
+				<div class="checkbox-group">
+					<input type="checkbox" id="autoColorCheckbox" checked class="checkbox" />
+					<label for="autoColorCheckbox" class="checkbox-label">Automatic card color</label>
+				</div>
+
+				<div class="form-group">
+					<label class="form-label">Background Color</label>
+					<input type="color" id="bgColor" value="#d84c3d" class="color-input" />
+				</div>
+
+				<div class="checkbox-group">
+					<input type="checkbox" id="showLogoCheckbox" checked class="checkbox" />
+					<label for="showLogoCheckbox" class="checkbox-label">Show Spotify logo</label>
+					<input type="checkbox" id="roundedCheckbox" checked class="checkbox" />
+					<label for="roundedCheckbox" class="checkbox-label">Rounded card border</label>
+				</div>
+
+				<div class="buttons-container">
+					<button id="copyBtn" class="btn btn-primary">Copy</button>
+					<button id="saveBtn" class="btn btn-secondary">Save</button>
+				</div>
+			</div>
+
+			<div class="main-content">
+				<div class="card" id="card">
+					<div class="header">
+						<img src="" id="coverPreview" alt="Cover" draggable="false" />
+						<div>
+							<span class="title" id="cardTitle">Song title</span>
+							<span class="artist">Song · <span id="cardArtist">Artist</span></span>
+						</div>
+					</div>
+					<div class="lyrics" id="cardLyrics">Song lyrics...</div>
+					<svg class="spotify-logo" id="spotifyLogo" fill="currentColor" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 559 168">
+						<path
+							d="m83.996 0.277c-46.249 0-83.743 37.493-83.743 83.742 0 46.251 37.494 83.741 83.743 83.741 46.254 0 83.744-37.49 83.744-83.741 0-46.246-37.49-83.738-83.745-83.738l0.001-0.004zm38.404 120.78c-1.5 2.46-4.72 3.24-7.18 1.73-19.662-12.01-44.414-14.73-73.564-8.07-2.809 0.64-5.609-1.12-6.249-3.93-0.643-2.81 1.11-5.61 3.926-6.25 31.9-7.288 59.263-4.15 81.337 9.34 2.46 1.51 3.24 4.72 1.73 7.18zm10.25-22.802c-1.89 3.072-5.91 4.042-8.98 2.152-22.51-13.836-56.823-17.843-83.448-9.761-3.453 1.043-7.1-0.903-8.148-4.35-1.04-3.453 0.907-7.093 4.354-8.143 30.413-9.228 68.222-4.758 94.072 11.127 3.07 1.89 4.04 5.91 2.15 8.976v-0.001zm0.88-23.744c-26.99-16.031-71.52-17.505-97.289-9.684-4.138 1.255-8.514-1.081-9.768-5.219-1.254-4.14 1.08-8.513 5.221-9.771 29.581-8.98 78.756-7.245 109.83 11.202 3.73 2.209 4.95 7.016 2.74 10.733-2.2 3.722-7.02 4.949-10.73 2.739zm94.56 3.072c-14.46-3.448-17.03-5.868-17.03-10.953 0-4.804 4.52-8.037 11.25-8.037 6.52 0 12.98 2.455 19.76 7.509 0.2 0.153 0.46 0.214 0.71 0.174 0.26-0.038 0.48-0.177 0.63-0.386l7.06-9.952c0.29-0.41 0.21-0.975-0.18-1.288-8.07-6.473-17.15-9.62-27.77-9.62-15.61 0-26.52 9.369-26.52 22.774 0 14.375 9.41 19.465 25.67 23.394 13.83 3.187 16.17 5.857 16.17 10.629 0 5.29-4.72 8.58-12.32 8.58-8.44 0-15.33-2.85-23.03-9.51-0.19-0.17-0.45-0.24-0.69-0.23-0.26 0.02-0.49 0.14-0.65 0.33l-7.92 9.42c-0.33 0.4-0.29 0.98 0.09 1.32 8.96 8 19.98 12.22 31.88 12.22 16.82 0 27.69-9.19 27.69-23.42 0.03-12.007-7.16-18.657-24.77-22.941l-0.03-0.013zm62.86-14.26c-7.29 0-13.27 2.872-18.21 8.757v-6.624c0-0.523-0.42-0.949-0.94-0.949h-12.95c-0.52 0-0.94 0.426-0.94 0.949v73.601c0 0.52 0.42 0.95 0.94 0.95h12.95c0.52 0 0.94-0.43 0.94-0.95v-23.23c4.94 5.53 10.92 8.24 18.21 8.24 13.55 0 27.27-10.43 27.27-30.369 0.02-19.943-13.7-30.376-27.26-30.376l-0.01 0.001zm12.21 30.375c0 10.149-6.25 17.239-15.21 17.239-8.85 0-15.53-7.41-15.53-17.239 0-9.83 6.68-17.238 15.53-17.238 8.81-0.001 15.21 7.247 15.21 17.237v0.001zm50.21-30.375c-17.45 0-31.12 13.436-31.12 30.592 0 16.972 13.58 30.262 30.91 30.262 17.51 0 31.22-13.39 31.22-30.479 0-17.031-13.62-30.373-31.01-30.373v-0.002zm0 47.714c-9.28 0-16.28-7.46-16.28-17.344 0-9.929 6.76-17.134 16.07-17.134 9.34 0 16.38 7.457 16.38 17.351 0 9.927-6.8 17.127-16.17 17.127zm68.27-46.53h-14.25v-14.566c0-0.522-0.42-0.948-0.94-0.948h-12.95c-0.52 0-0.95 0.426-0.95 0.948v14.566h-6.22c-0.52 0-0.94 0.426-0.94 0.949v11.127c0 0.522 0.42 0.949 0.94 0.949h6.22v28.795c0 11.63 5.79 17.53 17.22 17.53 4.64 0 8.49-0.96 12.12-3.02 0.3-0.16 0.48-0.48 0.48-0.82v-10.6c0-0.32-0.17-0.63-0.45-0.8-0.28-0.18-0.63-0.19-0.92-0.04-2.49 1.25-4.9 1.83-7.6 1.83-4.15 0-6.01-1.89-6.01-6.11v-26.76h14.25c0.52 0 0.94-0.426 0.94-0.949v-11.126c0.02-0.523-0.4-0.949-0.93-0.949l-0.01-0.006zm49.64 0.057v-1.789c0-5.263 2.02-7.61 6.54-7.61 2.7 0 4.87 0.536 7.3 1.346 0.3 0.094 0.61 0.047 0.85-0.132 0.25-0.179 0.39-0.466 0.39-0.77v-10.91c0-0.417-0.26-0.786-0.67-0.909-2.56-0.763-5.84-1.546-10.76-1.546-11.95 0-18.28 6.734-18.28 19.467v2.74h-6.22c-0.52 0-0.95 0.426-0.95 0.948v11.184c0 0.522 0.43 0.949 0.95 0.949h6.22v44.405c0 0.53 0.43 0.95 0.95 0.95h12.94c0.53 0 0.95-0.42 0.95-0.95v-44.402h12.09l18.52 44.402c-2.1 4.66-4.17 5.59-6.99 5.59-2.28 0-4.69-0.68-7.14-2.03-0.23-0.12-0.51-0.14-0.75-0.07-0.25 0.09-0.46 0.27-0.56 0.51l-4.39 9.63c-0.21 0.46-0.03 0.99 0.41 1.23 4.58 2.48 8.71 3.54 13.82 3.54 9.56 0 14.85-4.46 19.5-16.44l22.46-58.037c0.12-0.292 0.08-0.622-0.1-0.881-0.17-0.257-0.46-0.412-0.77-0.412h-13.48c-0.41 0-0.77 0.257-0.9 0.636l-13.81 39.434-15.12-39.46c-0.14-0.367-0.49-0.61-0.88-0.61h-22.12v-0.003zm-28.78-0.057h-12.95c-0.52 0-0.95 0.426-0.95 0.949v56.481c0 0.53 0.43 0.95 0.95 0.95h12.95c0.52 0 0.95-0.42 0.95-0.95v-56.477c0-0.523-0.42-0.949-0.95-0.949v-0.004zm-6.4-25.719c-5.13 0-9.29 4.152-9.29 9.281 0 5.132 4.16 9.289 9.29 9.289s9.28-4.157 9.28-9.289c0-5.128-4.16-9.281-9.28-9.281zm113.42 43.88c-5.12 0-9.11-4.115-9.11-9.112s4.04-9.159 9.16-9.159 9.11 4.114 9.11 9.107c0 4.997-4.04 9.164-9.16 9.164zm0.05-17.365c-4.67 0-8.2 3.71-8.2 8.253 0 4.541 3.51 8.201 8.15 8.201 4.67 0 8.2-3.707 8.2-8.253 0-4.541-3.51-8.201-8.15-8.201zm2.02 9.138l2.58 3.608h-2.18l-2.32-3.31h-1.99v3.31h-1.82v-9.564h4.26c2.23 0 3.69 1.137 3.69 3.051 0.01 1.568-0.9 2.526-2.21 2.905h-0.01zm-1.54-4.315h-2.37v3.025h2.37c1.18 0 1.89-0.579 1.89-1.514 0-0.984-0.71-1.511-1.89-1.511z"
+						/>
+					</svg>
+				</div>
+			</div>
+		</div>
+
+		<footer>
+			Made by <a href="https://mozartsempiano.com/">mozartsempiano</a> /
+			<a href="/doar.html">Donate</a>
+		</footer>
+
+		<script>
+			// =============================
+			// CONFIGURATION - edit these to change export and appearance
+			// =============================
+			const CONFIG = {
+				// Export appearance
+				exportBg: "#000000", // background color behind rounded card in exported image
+				exportScale: 912 / 532, // export canvas scale (output width / preview width)
+				exportJpegQuality: 0.92, // JPEG quality for final .jpg (0.0 - 1.0)
+
+				// Card geometry and preview sizes
+				previewWidth: 912, // preview width in px
+				previewHeight: 532, // preview height in px
+				cardPaddingPx: 48, // vertical padding used in calculations (24 top + 24 bottom)
+				defaultRadiusPx: 15, // fallback radius if CSS variable missing
+
+				// Lyrics auto-sizing
+				lyricsFontMaxEm: 9,
+				lyricsFontMinEm: 0.6,
+				lyricsFontStepEm: 0.01,
+
+				// Color heuristics
+				colorSampleStep: 8, // sample every N pixels when extracting colors
+				grayThreshold: 10, // threshold for gray detection
+				saturationBoostPercent: 28, // boost when color saturation is low
+				minContrastRatio: 4.5, // WCAG minimum contrast ratio against black text
+				// Additional geometry
+				lyricsMaxHeightDefault: 342,
+				logoHeight: 60,
+				logoClearance: 8,
+			};
+
+			// DOM references
+			const coverUpload = document.getElementById("coverUpload");
+			const coverPreview = document.getElementById("coverPreview");
+			const titleInput = document.getElementById("titleInput");
+			const artistInput = document.getElementById("artistInput");
+			const lyricsInput = document.getElementById("lyricsInput");
+			const cardTitle = document.getElementById("cardTitle");
+			const cardArtist = document.getElementById("cardArtist");
+			const cardLyrics = document.getElementById("cardLyrics");
+			const bgColorInput = document.getElementById("bgColor");
+			const card = document.getElementById("card");
+			const copyBtn = document.getElementById("copyBtn");
+			const saveBtn = document.getElementById("saveBtn");
+			const autoColorCheckbox = document.getElementById("autoColorCheckbox");
+			const showLogoCheckbox = document.getElementById("showLogoCheckbox");
+			const spotifyLogo = document.getElementById("spotifyLogo");
+			const roundedCheckbox = document.getElementById("roundedCheckbox");
+			// legacy top-level exports (kept for compatibility)
+			const EXPORT_BG = CONFIG.exportBg;
+			const DEFAULT_CSS_RADIUS_PX = CONFIG.defaultRadiusPx;
+
+			// extract color counts from image (coarse quantization)
+			function getDominantColorCounts(img) {
+				const canvas = document.createElement("canvas");
+				const ctx = canvas.getContext("2d");
+
+				canvas.width = img.width;
+				canvas.height = img.height;
+
+				ctx.drawImage(img, 0, 0, img.width, img.height);
+
+				const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+				const data = imageData.data;
+
+				const colorCount = {};
+				const sampleStep = CONFIG.colorSampleStep; // sample every N pixels for speed
+
+				for (let i = 0; i < data.length; i += sampleStep * 4) {
+					const r = Math.floor(data[i] / 32) * 32;
+					const g = Math.floor(data[i + 1] / 32) * 32;
+					const b = Math.floor(data[i + 2] / 32) * 32;
+
+					const key = `${r},${g},${b}`;
+					colorCount[key] = (colorCount[key] || 0) + 1;
+				}
+
+				return colorCount; // { "r,g,b": count }
+			}
+
+			// determine if a color is grayish (low saturation)
+			function isGrayish(r, g, b, threshold = CONFIG.grayThreshold) {
+				// smaller threshold -> fewer colors considered gray (more aggressive non-gray preference)
+				return Math.abs(r - g) <= threshold && Math.abs(r - b) <= threshold && Math.abs(g - b) <= threshold;
+			}
+
+			// choose the most common non-gray color; fall back to the absolute dominant color
+			function chooseDominantNonGray(colorCount) {
+				let dominant = null;
+				let maxCount = 0;
+
+				// first pass: find the absolute dominant
+				for (const key in colorCount) {
+					if (colorCount[key] > maxCount) {
+						maxCount = colorCount[key];
+						dominant = key;
+					}
+				}
+
+				// if absolute dominant is not gray, return it immediately
+				if (dominant) {
+					const [dr, dg, db] = dominant.split(",").map(Number);
+					if (!isGrayish(dr, dg, db, CONFIG.grayThreshold)) return dominant;
+				}
+
+				// second pass: try to find the most frequent non-gray color
+				let nonGray = null;
+				let nonGrayCount = 0;
+				for (const key in colorCount) {
+					const [r, g, b] = key.split(",").map(Number);
+					if (!isGrayish(r, g, b, CONFIG.grayThreshold) && colorCount[key] > nonGrayCount) {
+						nonGrayCount = colorCount[key];
+						nonGray = key;
+					}
+				}
+
+				// If a non-gray was found and it's reasonably frequent relative to dominant, prefer it
+				// Lower threshold: accept a non-gray even if it has >= 15% of dominant count to be more aggressive.
+				if (nonGray && nonGrayCount >= maxCount * 0.15) {
+					return nonGray;
+				}
+
+				// otherwise return the absolute dominant (could be gray)
+				return dominant;
+			}
+
+			// Convert RGB to Hex
+			function rgbToHex(rgb) {
+				const result = rgb.match(/\d+/g);
+				if (!result) return "#d84c3d";
+
+				const r = parseInt(result[0]);
+				const g = parseInt(result[1]);
+				const b = parseInt(result[2]);
+
+				return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+			}
+
+			// --- Color helpers: RGB <-> HSL and saturation boost ---
+			function rgbToHsl(r, g, b) {
+				r /= 255;
+				g /= 255;
+				b /= 255;
+				const max = Math.max(r, g, b),
+					min = Math.min(r, g, b);
+				let h, s;
+				const l = (max + min) / 2;
+
+				if (max === min) {
+					h = s = 0; // achromatic
+				} else {
+					const d = max - min;
+					s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+					switch (max) {
+						case r:
+							h = (g - b) / d + (g < b ? 6 : 0);
+							break;
+						case g:
+							h = (b - r) / d + 2;
+							break;
+						default:
+							h = (r - g) / d + 4;
+					}
+					h /= 6;
+				}
+				return [h, s, l];
+			}
+
+			function hslToRgb(h, s, l) {
+				let r, g, b;
+				if (s === 0) {
+					r = g = b = l; // achromatic
+				} else {
+					const hue2rgb = (p, q, t) => {
+						if (t < 0) t += 1;
+						if (t > 1) t -= 1;
+						if (t < 1 / 6) return p + (q - p) * 6 * t;
+						if (t < 1 / 2) return q;
+						if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+						return p;
+					};
+
+					const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+					const p = 2 * l - q;
+					r = hue2rgb(p, q, h + 1 / 3);
+					g = hue2rgb(p, q, h);
+					b = hue2rgb(p, q, h - 1 / 3);
+				}
+				return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+			}
+
+			function boostSaturationRgb(r, g, b, boostPercent = CONFIG.saturationBoostPercent) {
+				const [h, s, l] = rgbToHsl(r, g, b);
+				const newS = Math.min(1, s + boostPercent / 100);
+				const [nr, ng, nb] = hslToRgb(h, newS, l);
+				return `rgb(${nr}, ${ng}, ${nb})`;
+			}
+
+			// Calculate luminance of a color (0-1, where 0 is black and 1 is white)
+			function getLuminance(r, g, b) {
+				// Convert RGB to linear RGB
+				const [rLin, gLin, bLin] = [r, g, b].map((c) => {
+					c = c / 255;
+					return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+				});
+
+				// Calculate luminance using the formula
+				return 0.2126 * rLin + 0.7152 * gLin + 0.0722 * bLin;
+			}
+
+			// Ensure minimum contrast ratio with black text
+			function ensureContrast(rgb) {
+				const result = rgb.match(/\d+/g);
+				if (!result) return rgb;
+
+				let r = parseInt(result[0]);
+				let g = parseInt(result[1]);
+				let b = parseInt(result[2]);
+
+				const minContrastRatio = CONFIG.minContrastRatio; // WCAG AA standard
+				const blackLuminance = 0; // Luminance of black text
+
+				let currentLuminance = getLuminance(r, g, b);
+				let contrastRatio = (currentLuminance + 0.05) / (blackLuminance + 0.05);
+
+				// If contrast is too low, lighten the color
+				while (contrastRatio < minContrastRatio && currentLuminance < 0.8) {
+					// Increase brightness by adding to each component
+					const increment = 15;
+					r = Math.min(255, r + increment);
+					g = Math.min(255, g + increment);
+					b = Math.min(255, b + increment);
+
+					currentLuminance = getLuminance(r, g, b);
+					contrastRatio = (currentLuminance + 0.05) / (blackLuminance + 0.05);
+				}
+
+				return `rgb(${r}, ${g}, ${b})`;
+			}
+
+			// Auto-update functionality
+			function adjustLyricsFontSize() {
+				const maxFontSize = CONFIG.lyricsFontMaxEm;
+				const minFontSize = CONFIG.lyricsFontMinEm;
+				const stepSize = CONFIG.lyricsFontStepEm;
+
+				// Reset to max size first
+				cardLyrics.style.fontSize = maxFontSize + "em";
+
+				// Get available space (card height minus header and padding)
+				const cardHeight = CONFIG.previewHeight; // preview height
+				const headerHeight = cardLyrics.previousElementSibling.offsetHeight;
+				const cardPadding = CONFIG.cardPaddingPx; // 24px top + 24px bottom
+				const logoSpace = showLogoCheckbox.checked ? 60 : 30; // Extra space for logo
+
+				const cardInnerHeight = card.clientHeight; // includes padding, simpler than hardcoded 532/48
+				const computed = getComputedStyle(cardLyrics);
+				const cssMaxHeight = parseFloat(computed.maxHeight) || CONFIG.lyricsMaxHeightDefault; // fallback to config
+				const lyricsMarginBottom = parseFloat(computed.marginBottom) || 0; // in px
+
+				// reserve space for spotify logo if visible (logo height + small clearance)
+				let logoReserve = 0;
+				if (showLogoCheckbox.checked && spotifyLogo && getComputedStyle(spotifyLogo).display !== "none") {
+					logoReserve = spotifyLogo.getBoundingClientRect().height + CONFIG.logoClearance; // clearance from config
+				}
+
+				// If logo is hidden, allow lyrics to expand into logo area by increasing the effective max height
+				const effectiveMax = showLogoCheckbox && !showLogoCheckbox.checked ? cssMaxHeight + (logoReserve || 0) : cssMaxHeight;
+				// write back to CSS custom property so CSS and JS stay in sync
+				try {
+					document.documentElement.style.setProperty("--lyrics-max-height", effectiveMax + "px");
+				} catch (e) {
+					/* ignore in environments that don't allow writing styles */
+				}
+				const availableHeight = Math.max(0, Math.min(effectiveMax, cardInnerHeight - headerHeight - logoReserve - lyricsMarginBottom));
+
+				let currentFontSize = maxFontSize;
+
+				// Reduce font size until text fits
+				while (cardLyrics.scrollHeight > availableHeight && currentFontSize > minFontSize) {
+					currentFontSize -= stepSize;
+					cardLyrics.style.fontSize = currentFontSize + "em";
+				}
+			}
+
+			function updateCard() {
+				cardTitle.textContent = titleInput.value || "Song title";
+				cardArtist.textContent = artistInput.value || "Artist";
+				cardLyrics.textContent = lyricsInput.value || "Song lyrics...";
+
+				// Update background color based on auto color setting
+				if (autoColorCheckbox.checked && coverPreview.src && coverPreview.complete) {
+					// Use auto color from cover image, preferring non-gray dominant colors
+					try {
+						const counts = getDominantColorCounts(coverPreview);
+						const chosenKey = chooseDominantNonGray(counts);
+						if (chosenKey) {
+							let [r, g, b] = chosenKey.split(",").map(Number);
+							let chosenRgb = `rgb(${r}, ${g}, ${b})`;
+							// if chosen color is low saturation, boost it slightly to avoid grayish look
+							const [, sVal] = rgbToHsl(r, g, b);
+							if (sVal < 0.18) {
+								chosenRgb = boostSaturationRgb(r, g, b, CONFIG.saturationBoostPercent);
+								const boosted = chosenRgb.match(/\d+/g).map(Number);
+								r = boosted[0];
+								g = boosted[1];
+								b = boosted[2];
+							}
+							const adjustedColor = ensureContrast(chosenRgb);
+							const hexColor = rgbToHex(adjustedColor);
+							card.style.backgroundColor = adjustedColor;
+							bgColorInput.value = hexColor;
+						} else {
+							// fallback to previous approach if no colors found
+							throw new Error("No dominant color found");
+						}
+					} catch (error) {
+						console.error("Error extracting color:", error);
+						// Fallback to manual color if extraction fails
+						const hex = bgColorInput.value;
+						const r = parseInt(hex.slice(1, 3), 16);
+						const g = parseInt(hex.slice(3, 5), 16);
+						const b = parseInt(hex.slice(5, 7), 16);
+						const rgbColor = `rgb(${r}, ${g}, ${b})`;
+						const adjustedColor = ensureContrast(rgbColor);
+						card.style.backgroundColor = adjustedColor;
+					}
+				} else {
+					// Use manual color picker value
+					const hex = bgColorInput.value;
+					const r = parseInt(hex.slice(1, 3), 16);
+					const g = parseInt(hex.slice(3, 5), 16);
+					const b = parseInt(hex.slice(5, 7), 16);
+					const rgbColor = `rgb(${r}, ${g}, ${b})`;
+					const adjustedColor = ensureContrast(rgbColor);
+					card.style.backgroundColor = adjustedColor;
+
+					// Update the color picker if the color was adjusted
+					const adjustedHex = rgbToHex(adjustedColor);
+					if (adjustedHex !== hex) {
+						bgColorInput.value = adjustedHex;
+					}
+				}
+
+				// Show/hide Spotify logo
+				spotifyLogo.style.display = showLogoCheckbox.checked ? "block" : "none";
+
+				// Sync CSS variable for lyrics max-height depending on logo state
+				try {
+					if (showLogoCheckbox.checked) {
+						// When logo is visible, cap lyrics to the fixed visual limit
+						document.documentElement.style.setProperty("--lyrics-max-height", "342px");
+					} else {
+						// When logo is hidden, allow lyrics to occupy the remaining vertical space
+						// Compute available height inside card for lyrics region.
+						const cardRect = card.getBoundingClientRect();
+						const headerH = cardLyrics.previousElementSibling.offsetHeight || 0;
+						const computed = getComputedStyle(cardLyrics);
+						const lyricsMarginBottom = parseFloat(computed.marginBottom) || 0;
+						const reserved = 24 + 24; // top + bottom padding used in layout (fallback)
+						const remaining = Math.max(0, cardRect.height - headerH - lyricsMarginBottom - reserved);
+						document.documentElement.style.setProperty("--lyrics-max-height", remaining + "px");
+					}
+				} catch (e) {
+					// ignore if DOM not ready or styles cannot be written
+				}
+
+				// Apply rounded border if requested
+				try {
+					const rounded = typeof roundedCheckbox !== "undefined" && roundedCheckbox && roundedCheckbox.checked;
+					// Update CSS variable so preview and exports stay in sync
+					document.documentElement.style.setProperty("--card-radius", rounded ? "20px" : "0px");
+					card.style.borderRadius = getComputedStyle(document.documentElement).getPropertyValue("--card-radius") || (rounded ? "20px" : "0px");
+				} catch (e) {
+					// If roundedCheckbox not found, ignore
+				}
+
+				// Adjust lyrics font size after content update
+				setTimeout(adjustLyricsFontSize, 10); // Small delay to ensure DOM update
+			}
+
+			// Add event listeners for auto-update
+			titleInput.addEventListener("input", updateCard);
+			artistInput.addEventListener("input", updateCard);
+			lyricsInput.addEventListener("input", updateCard);
+			bgColorInput.addEventListener("input", updateCard);
+			autoColorCheckbox.addEventListener("change", updateCard);
+			showLogoCheckbox.addEventListener("change", updateCard);
+			if (roundedCheckbox) roundedCheckbox.addEventListener("change", updateCard);
+
+			coverUpload.addEventListener("change", function () {
+				const file = this.files[0];
+				if (file) {
+					const reader = new FileReader();
+					reader.onload = function (e) {
+						coverPreview.src = e.target.result;
+
+						// Update card after image loads
+						coverPreview.onload = function () {
+							updateCard();
+						};
+					};
+					reader.readAsDataURL(file);
+				}
+			});
+
+			// Helper: rasterize an inline SVG element to a PNG data URL
+			async function rasterizeSvgToPng(svgEl) {
+				const svgClone = svgEl.cloneNode(true);
+				const computedColor = getComputedStyle(svgEl).color || "#000";
+				svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+				svgClone.setAttribute("style", `color: ${computedColor};`);
+				const svgData = new XMLSerializer().serializeToString(svgClone);
+				const svgDataUrl = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgData);
+
+				const img = new Image();
+				img.src = svgDataUrl;
+				await new Promise((res, rej) => {
+					img.onload = res;
+					img.onerror = rej;
+				});
+
+				const rect = svgEl.getBoundingClientRect();
+				// Render at higher internal resolution to avoid halos when scaled
+				const dpr = window.devicePixelRatio || 1;
+				const scaleMultiplier = Math.max(2, Math.round(dpr));
+				const w = Math.max(1, Math.round(rect.width * scaleMultiplier));
+				const h = Math.max(1, Math.round(rect.height * scaleMultiplier));
+
+				const canvas = document.createElement("canvas");
+				canvas.width = w;
+				canvas.height = h;
+				const ctx = canvas.getContext("2d");
+
+				// Use high quality smoothing for anti-aliasing
+				if (ctx) {
+					ctx.imageSmoothingEnabled = true;
+					if ("imageSmoothingQuality" in ctx) ctx.imageSmoothingQuality = "high";
+				}
+
+				// Determine an opaque background color matching the card.
+				// If computed background is transparent (e.g., gradient or none), fall back to the hex picker or white.
+				let cardBg = getComputedStyle(card).backgroundColor || "rgba(0,0,0,0)";
+				if (!cardBg || cardBg === "transparent" || cardBg === "rgba(0, 0, 0, 0)") {
+					const hex = typeof bgColorInput !== "undefined" && bgColorInput.value ? bgColorInput.value : "#ffffff";
+					const r = parseInt(hex.slice(1, 3), 16);
+					const g = parseInt(hex.slice(3, 5), 16);
+					const b = parseInt(hex.slice(5, 7), 16);
+					cardBg = `rgb(${r}, ${g}, ${b})`;
+				}
+
+				// Fill opaque background to avoid transparent anti-aliased edges blending with page background
+				ctx.fillStyle = cardBg;
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+				// Draw the SVG source scaled to the high-res canvas
+				ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+				return canvas.toDataURL("image/png");
+			}
+
+			// Helper: insert temporary image over svgEl, capture the card, then restore
+			async function captureCardWithTempImage(pngDataUrl, svgEl) {
+				const svgRect = svgEl.getBoundingClientRect();
+				const cardRect = card.getBoundingClientRect();
+				const left = svgRect.left - cardRect.left;
+				const top = svgRect.top - cardRect.top;
+
+				const tempImg = document.createElement("img");
+				tempImg.src = pngDataUrl;
+				tempImg.id = "spotifyLogoRasterized";
+				tempImg.style.position = "absolute";
+				tempImg.style.left = left + "px";
+				tempImg.style.top = top + "px";
+				// Keep CSS size equal to original so layout doesn't change; the PNG may be higher-res internally
+				tempImg.style.width = svgRect.width + "px";
+				tempImg.style.height = svgRect.height + "px";
+				tempImg.style.pointerEvents = "none";
+				// Ensure the image has the same background as the card and uses default smoothing
+				const cardBg = getComputedStyle(card).backgroundColor || "rgb(255,255,255)";
+				tempImg.style.backgroundColor = cardBg;
+				tempImg.style.imageRendering = "auto";
+				tempImg.style.willChange = "transform, opacity";
+				card.appendChild(tempImg);
+				svgEl.style.display = "none";
+
+				const canvas = await html2canvas(card, { backgroundColor: getComputedStyle(card).backgroundColor || null, scale: CONFIG.exportScale, useCORS: true });
+
+				tempImg.remove();
+				svgEl.style.display = "";
+				return canvas;
+			}
+
+			// Helper: create a final export canvas from a source canvas
+			// - preserves EXPORT_BG behind rounded corners
+			// - applies rounded clipping when `rounded` is true
+			function createExportCanvas(sourceCanvas, rounded) {
+				const outputWidth = sourceCanvas.width;
+				const outputHeight = sourceCanvas.height;
+				const outCanvas = document.createElement("canvas");
+				outCanvas.width = outputWidth;
+				outCanvas.height = outputHeight;
+				const outCtx = outCanvas.getContext("2d");
+
+				// fill background behind rounded card
+				outCtx.fillStyle = EXPORT_BG;
+				outCtx.fillRect(0, 0, outputWidth, outputHeight);
+
+				// compute scaled radius from CSS variable
+				const cardRect = card.getBoundingClientRect();
+				const scaleFactor = cardRect.width ? outputWidth / cardRect.width : 1;
+				let defaultCssRadius = DEFAULT_CSS_RADIUS_PX;
+				try {
+					const cssVal = getComputedStyle(document.documentElement).getPropertyValue("--card-radius") || DEFAULT_CSS_RADIUS_PX + "px";
+					defaultCssRadius = parseFloat(cssVal) || DEFAULT_CSS_RADIUS_PX;
+				} catch (e) {
+					defaultCssRadius = DEFAULT_CSS_RADIUS_PX;
+				}
+				const radiusPx = rounded ? defaultCssRadius * scaleFactor : 0;
+
+				if (radiusPx > 0) {
+					const r = radiusPx;
+					const w = outputWidth;
+					const h = outputHeight;
+					outCtx.save();
+					outCtx.beginPath();
+					outCtx.moveTo(r, 0);
+					outCtx.lineTo(w - r, 0);
+					outCtx.quadraticCurveTo(w, 0, w, r);
+					outCtx.lineTo(w, h - r);
+					outCtx.quadraticCurveTo(w, h, w - r, h);
+					outCtx.lineTo(r, h);
+					outCtx.quadraticCurveTo(0, h, 0, h - r);
+					outCtx.lineTo(0, r);
+					outCtx.quadraticCurveTo(0, 0, r, 0);
+					outCtx.closePath();
+					outCtx.clip();
+					outCtx.drawImage(sourceCanvas, 0, 0, outputWidth, outputHeight);
+					outCtx.restore();
+				} else {
+					outCtx.drawImage(sourceCanvas, 0, 0, outputWidth, outputHeight);
+				}
+
+				return outCanvas;
+			}
+
+			// Copy to clipboard function (uses helpers; falls back to download)
+			copyBtn.addEventListener("click", async function () {
+				try {
+					if (typeof html2canvas === "undefined") {
+						alert("To use the copy function, html2canvas library is required.");
+						return;
+					}
+
+					const svgEl = document.getElementById("spotifyLogo");
+					let canvas;
+
+					if (!svgEl || getComputedStyle(svgEl).display === "none") {
+						canvas = await html2canvas(card, { backgroundColor: getComputedStyle(card).backgroundColor || null, scale: CONFIG.exportScale, useCORS: true });
+					} else {
+						const pngDataUrl = await rasterizeSvgToPng(svgEl);
+						canvas = await captureCardWithTempImage(pngDataUrl, svgEl);
+					}
+
+					// Composite and export using helper
+					(async () => {
+						const outCanvas = createExportCanvas(canvas, roundedCheckbox && roundedCheckbox.checked);
+
+						outCanvas.toBlob(async (pngBlob) => {
+							if (!pngBlob) {
+								alert("Failed to create image blob.");
+								return;
+							}
+
+							if (!navigator.clipboard || typeof ClipboardItem === "undefined") {
+								alert("Clipboard image write not supported in this browser. Copy is unavailable.");
+								return;
+							}
+
+							try {
+								await navigator.clipboard.write([new ClipboardItem({ "image/png": pngBlob })]);
+								alert("Card copied to clipboard!");
+								return;
+							} catch (err) {
+								console.warn("PNG clipboard write failed, trying JPEG fallback:", err);
+							}
+
+							// JPEG fallback
+							outCanvas.toBlob(
+								async (jpegBlob) => {
+									if (!jpegBlob) {
+										alert("Failed to create JPEG fallback blob for clipboard.");
+										return;
+									}
+									try {
+										await navigator.clipboard.write([new ClipboardItem({ "image/jpeg": jpegBlob })]);
+										alert("Card copied to clipboard! (JPEG)");
+										return;
+									} catch (err2) {
+										console.error("JPEG clipboard write also failed:", err2);
+										alert("Could not write image to clipboard (browser may require HTTPS/permission).");
+										return;
+									}
+								},
+								"image/jpeg",
+								CONFIG.exportJpegQuality
+							);
+						}, "image/png");
+					})();
+				} catch (err) {
+					console.error("Erro ao copiar:", err);
+					alert("Error copying to clipboard.");
+				}
+			});
+
+			// Save as JPG function (uses helpers)
+			saveBtn.addEventListener("click", async function () {
+				try {
+					if (typeof html2canvas === "undefined") {
+						alert("To use the save function, html2canvas library is required.");
+						return;
+					}
+
+					const svgEl = document.getElementById("spotifyLogo");
+					let canvas;
+
+					if (!svgEl || getComputedStyle(svgEl).display === "none") {
+						canvas = await html2canvas(card, { backgroundColor: getComputedStyle(card).backgroundColor || null, scale: CONFIG.exportScale, useCORS: true });
+					} else {
+						const pngDataUrl = await rasterizeSvgToPng(svgEl);
+						canvas = await captureCardWithTempImage(pngDataUrl, svgEl);
+					}
+
+					// Compose and save using helper
+					(async () => {
+						const outCanvas = createExportCanvas(canvas, roundedCheckbox && roundedCheckbox.checked);
+
+						outCanvas.toBlob(
+							(blob) => {
+								if (!blob) {
+									alert("Failed to create image blob.");
+									return;
+								}
+								const url = URL.createObjectURL(blob);
+								const a = document.createElement("a");
+								a.href = url;
+								a.download = `spotify-lyrics-${Date.now()}.jpg`;
+								document.body.appendChild(a);
+								a.click();
+								document.body.removeChild(a);
+								URL.revokeObjectURL(url);
+							},
+							"image/jpeg",
+							CONFIG.exportJpegQuality
+						);
+					})();
+				} catch (err) {
+					console.error("Erro ao salvar:", err);
+					alert("Error saving image.");
+				}
+			});
+
+			// Initial update
+			updateCard();
+		</script>
+	</body>
+</html>
