@@ -46,6 +46,21 @@ const autoColorCheckbox = document.getElementById("autoColorCheckbox");
 const showLogoCheckbox = document.getElementById("showLogoCheckbox");
 const spotifyLogo = document.getElementById("spotifyLogo");
 const roundedCheckbox = document.getElementById("roundedCheckbox");
+
+// Bloqueia/desbloqueia o form-group do background color
+const bgColorFormGroup = bgColorInput.closest(".form-group");
+function updateBgColorState() {
+	if (autoColorCheckbox.checked) {
+		bgColorInput.disabled = true;
+		bgColorFormGroup.classList.add("disabled-form-group");
+	} else {
+		bgColorInput.disabled = false;
+		bgColorFormGroup.classList.remove("disabled-form-group");
+	}
+}
+autoColorCheckbox.addEventListener("change", updateBgColorState);
+// Inicializa estado ao carregar
+updateBgColorState();
 // legacy top-level exports (kept for compatibility)
 const EXPORT_BG = CONFIG.exportBg;
 const DEFAULT_CSS_RADIUS_PX = CONFIG.defaultRadiusPx;

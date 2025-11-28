@@ -15,97 +15,105 @@
 				<h1 class="header-title">Lyrics Card Maker</h1>
 				<p class="header-subtitle">Create Spotify-style lyric cards</p>
 
-				<div class="form-group">
-					<label class="form-label">Album Cover</label>
-					<div class="file-input-wrapper">
-						<input
-							type="file"
-							id="coverUpload"
-							accept="image/*"
-							class="file-input"
-						/>
-						<div class="file-input-label">
-							<span>Choose image</span>
+				<div>
+					<div>
+						<div class="form-group">
+							<label class="form-label">Album Cover</label>
+							<div class="file-input-wrapper">
+								<input
+									type="file"
+									id="coverUpload"
+									accept="image/*"
+									class="file-input"
+								/>
+								<div class="file-input-label">
+									<span>Choose image</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Title</label>
+							<input
+								type="text"
+								id="titleInput"
+								placeholder="Song title"
+								class="form-input"
+							/>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Artist</label>
+							<input
+								type="text"
+								id="artistInput"
+								placeholder="Artist name"
+								class="form-input"
+							/>
+						</div>
+
+						<div class="form-group">
+							<label class="form-label">Lyrics</label>
+							<textarea
+								id="lyricsInput"
+								placeholder="Enter song lyrics..."
+								rows="4"
+								class="form-input"
+							></textarea>
+						</div>
+
+						<div id="color-labels">
+							<div class="checkbox-group">
+								<input
+									type="checkbox"
+									id="autoColorCheckbox"
+									checked
+									class="checkbox"
+								/>
+								<label for="autoColorCheckbox" class="checkbox-label"
+									>Automatic card color</label
+								>
+							</div>
+
+							<div class="form-group" id="bg-color">
+								<label class="form-label">Background Color</label>
+								<input
+									type="color"
+									id="bgColor"
+									value="#d84c3d"
+									class="color-input"
+								/>
+							</div>
+						</div>
+
+						<div>
+							<div class="checkbox-group">
+								<input
+									type="checkbox"
+									id="showLogoCheckbox"
+									checked
+									class="checkbox"
+								/>
+								<label for="showLogoCheckbox" class="checkbox-label"
+									>Show Spotify logo</label
+								>
+								<input
+									type="checkbox"
+									id="roundedCheckbox"
+									checked
+									class="checkbox"
+								/>
+								<label for="roundedCheckbox" class="checkbox-label"
+									>Rounded card border</label
+								>
+							</div>
 						</div>
 					</div>
-				</div>
 
-				<div class="form-group">
-					<label class="form-label">Title</label>
-					<input
-						type="text"
-						id="titleInput"
-						placeholder="Song title"
-						class="form-input"
-					/>
-				</div>
-
-				<div class="form-group">
-					<label class="form-label">Artist</label>
-					<input
-						type="text"
-						id="artistInput"
-						placeholder="Artist name"
-						class="form-input"
-					/>
-				</div>
-
-				<div class="form-group">
-					<label class="form-label">Lyrics</label>
-					<textarea
-						id="lyricsInput"
-						placeholder="Enter song lyrics..."
-						rows="4"
-						class="form-input"
-					></textarea>
-				</div>
-
-				<div class="checkbox-group">
-					<input
-						type="checkbox"
-						id="autoColorCheckbox"
-						checked
-						class="checkbox"
-					/>
-					<label for="autoColorCheckbox" class="checkbox-label"
-						>Automatic card color</label
-					>
-				</div>
-
-				<div class="form-group">
-					<label class="form-label">Background Color</label>
-					<input
-						type="color"
-						id="bgColor"
-						value="#d84c3d"
-						class="color-input"
-					/>
-				</div>
-
-				<div class="checkbox-group">
-					<input
-						type="checkbox"
-						id="showLogoCheckbox"
-						checked
-						class="checkbox"
-					/>
-					<label for="showLogoCheckbox" class="checkbox-label"
-						>Show Spotify logo</label
-					>
-					<input
-						type="checkbox"
-						id="roundedCheckbox"
-						checked
-						class="checkbox"
-					/>
-					<label for="roundedCheckbox" class="checkbox-label"
-						>Rounded card border</label
-					>
-				</div>
-
-				<div class="buttons-container">
-					<button id="copyBtn" class="btn btn-primary">Copy</button>
-					<button id="saveBtn" class="btn btn-secondary">Save</button>
+					<div class="buttons-container">
+						<button id="copyBtn" class="btn btn-primary">Copy</button>
+						<button id="saveBtn" class="btn btn-secondary">Save</button>
+					</div>
 				</div>
 			</div>
 
@@ -139,7 +147,7 @@
 
 		<footer>
 			Made by <a href="https://mozartsempiano.com/">mozartsempiano</a> /
-			<a href="https://mozartsempiano.com/doar">Donate</a>
+			<a href="https://github.com/mozartsempiano/lyrics-maker">GitHub</a>
 		</footer>
 
 		<script src="assets/js/script.js"></script>

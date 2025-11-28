@@ -31,32 +31,39 @@
 	box-sizing: border-box;
 }
 
+::selection {
+	background: #1ed760;
+	color: #000;
+}
+
 body {
 	font-family: "Circular", "Helvetica Neue", Arial, sans-serif;
-	background: linear-gradient(135deg, #1ed760 0%, #1db954 100%);
+	background: #0b080b;
 	min-height: 100vh;
 	color: #fff;
 	overflow-x: hidden;
+	font-size: 14px;
 }
 
 .container {
 	display: flex;
 	min-height: 100vh;
 	gap: 40px;
-	padding: 40px;
-	max-width: 1400px;
+	padding: 0;
+	max-width: 100vw;
 	margin: 0 auto;
 }
 
 .sidebar {
 	flex: 1;
-	max-width: 400px;
-	background: rgba(0, 0, 0, 0.7);
-	border-radius: 12px;
-	padding: 32px;
-	backdrop-filter: blur(10px);
-	border: 1px solid rgba(255, 255, 255, 0.1);
+	max-width: 460px;
 	height: fit-content;
+	background: #0b080b;
+	border-right: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 12px;
+	backdrop-filter: blur(10px);
+	padding: 34px 54px;
+	margin: 20px 0;
 }
 
 .main-content {
@@ -69,28 +76,35 @@ body {
 }
 
 .header-title {
-	font-size: 2.5rem;
-	font-weight: 900;
+	font-size: 2.5em;
+	font-weight: 800;
 	margin-bottom: 8px;
-	background: linear-gradient(45deg, #1ed760, #ffffff);
-	-webkit-background-clip: text;
-	-webkit-text-fill-color: transparent;
-	background-clip: text;
+	color: #fff;
 }
 
 .header-subtitle {
-	font-size: 1rem;
-	color: rgba(255, 255, 255, 0.7);
+	font-size: 1em;
+	color: #888;
 	margin-bottom: 32px;
 }
 
 .form-group {
 	margin-bottom: 24px;
+	transition: opacity 0.25s, filter 0.25s;
+}
+
+/* Estado desabilitado para form-group (background color) */
+.disabled-form-group {
+	opacity: 0.3;
+	pointer-events: none;
+	filter: grayscale(0.7);
+	transition: opacity 0.25s, filter 0.25s;
+	cursor: not-allowed;
 }
 
 .form-label {
 	display: block;
-	font-size: 0.9rem;
+	font-size: 0.9em;
 	font-weight: 600;
 	color: rgba(255, 255, 255, 0.9);
 	margin-bottom: 8px;
@@ -100,13 +114,14 @@ body {
 
 .form-input {
 	width: 100%;
-	padding: 16px;
+	padding: 10px;
 	border: 2px solid rgba(255, 255, 255, 0.1);
 	border-radius: 8px;
 	background: rgba(255, 255, 255, 0.05);
 	color: #fff;
-	font-size: 1rem;
-	transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+	font-size: 1em;
+	transition: border-color 0.25s ease, box-shadow 0.25s ease,
+		background 0.25s ease;
 	font-family: inherit;
 }
 
@@ -141,6 +156,11 @@ textarea.form-input {
 	cursor: pointer;
 }
 
+label,
+.file-input-label {
+	user-select: none;
+}
+
 .file-input-label {
 	display: flex;
 	align-items: center;
@@ -150,9 +170,9 @@ textarea.form-input {
 	border: 2px dashed rgba(255, 255, 255, 0.3);
 	border-radius: 8px;
 	background: rgba(255, 255, 255, 0.05);
-	color: rgba(255, 255, 255, 0.7);
+	color: #333;
 	cursor: pointer;
-	transition: all 0.3s ease;
+	transition: all 0.25s ease;
 	font-weight: 500;
 }
 
@@ -181,7 +201,7 @@ input[type="checkbox"].checkbox {
 }
 
 .checkbox-label {
-	font-size: 0.95rem;
+	font-size: 1em;
 	color: rgba(255, 255, 255, 0.9);
 	cursor: pointer;
 	user-select: none;
@@ -195,7 +215,7 @@ input[type="checkbox"].checkbox {
 	border-radius: 8px;
 	background: none;
 	cursor: pointer;
-	transition: all 0.3s ease;
+	transition: all 0.25s ease;
 }
 
 .color-input:hover {
@@ -213,11 +233,11 @@ input[type="checkbox"].checkbox {
 	flex: 1;
 	padding: 16px 24px;
 	border: none;
-	border-radius: 50px;
+	border-radius: 8px;
 	font-weight: 700;
-	font-size: 0.95rem;
+	font-size: 0.95em;
 	cursor: pointer;
-	transition: all 0.3s ease;
+	transition: background 0.25s, color 0.25s, box-shadow 0.25s, transform 0.25s;
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 	font-family: inherit;
@@ -263,7 +283,7 @@ input[type="checkbox"].checkbox {
 	position: relative;
 	user-select: none;
 	box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-	transition: transform 0.3s ease;
+	transition: transform 0.25s ease;
 	font-size: 1rem;
 	overflow: hidden;
 }
@@ -343,18 +363,20 @@ input[type="checkbox"].checkbox {
 footer {
 	text-align: center;
 	padding: 18px 0;
-	color: black;
-	font-size: 0.95rem;
+	color: #888;
+	font-size: 1em;
+	user-select: none;
 }
 
 footer a {
-	color: inherit;
-	text-decoration: underline dotted;
-	transition: filter 0.2s ease;
+	color: #1ed760;
+	text-decoration: none;
+	transition: filter 0.25s ease;
 }
 
 footer a:hover {
-	text-decoration: underline solid;
+	text-decoration: none;
+	filter: brightness(120%);
 }
 
 @media (max-width: 1024px) {
@@ -365,8 +387,10 @@ footer a:hover {
 	}
 
 	.sidebar {
-		max-width: none;
+		max-width: 100vw;
+		width: 100vw;
 		order: 1;
+		border: 0;
 	}
 
 	.main-content {
@@ -377,6 +401,17 @@ footer a:hover {
 	.card {
 		width: 100%;
 		max-width: 532px;
+	}
+
+	#color-labels {
+		display: flex;
+		gap: 20px;
+		flex-wrap: wrap;
+		flex-direction: row;
+	}
+
+	.form-group#bg-color {
+		flex: 1;
 	}
 }
 
@@ -391,7 +426,7 @@ footer a:hover {
 	}
 
 	.header-title {
-		font-size: 2rem;
+		font-size: 2em;
 	}
 
 	.card {
@@ -419,7 +454,7 @@ footer a:hover {
 	}
 
 	.header-title {
-		font-size: 1.75rem;
+		font-size: 1.75em;
 	}
 
 	.form-input {
