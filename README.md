@@ -4,7 +4,7 @@ Easily create custom lyric cards, like the ones from Spotify, with an intuitive 
 
 ## Quick Start
 
-**Use online**: Visit https://mozartsempiano.github.io/lyrics-maker/
+**Use online**: Visit https://lyrics.mozartsempiano.com/
 
 **Local development**:
 
